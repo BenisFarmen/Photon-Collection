@@ -56,6 +56,7 @@ PhotonRegister.save(photon_name='SimpleCNN',
 
 my_pipe = Hyperpipe('BiClusteringPipe',
                         optimizer='grid_search',
+                        optimizer_params= {'num_iterations': 1},
                         metrics=['accuracy'],
                         best_config_metric='accuracy',
                         inner_cv=KFold(n_splits=5, shuffle=True, random_state=42),
