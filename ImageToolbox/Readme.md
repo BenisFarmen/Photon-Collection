@@ -7,3 +7,4 @@ This is the imaging toolbox containing a number of tools for image classificatio
  - Downsampling Methods
  - Image Gradient Methods
  - Further OpenCV Image modifying tools
+5. Siamese Classifier
