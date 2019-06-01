@@ -27,6 +27,7 @@ class GraphModifier(BaseEstimator, TransformerMixin):
         X = np.reshape(X, (X.shape[0], X.shape[1], X.shape[2], -1)
         #X = X[..., None] + adjacency[None, None, :] #use broadcasting to speed up computation
         adjacency = np.repeat(adjacency[np.newaxis, :, :, np.newaxis], X.shape[0], axis=0)
+        X = np.append(X, adjacency, axis=0)
 
         #Todo: concatenate matrices, so that you have an extra dimension for the adjacency matrix
         #Todo: CAVE!!! check that the matrices have similar shape, so that you can actually concatenate them (and make sure that they are compatible with the pytorch_geometric)
