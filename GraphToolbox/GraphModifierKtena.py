@@ -75,11 +75,23 @@ class GraphModifier(BaseEstimator, TransformerMixin):
         return W
 
     def transform(self, X):
-        X_reordered = np.empty(X.shape)
-        for i in range(X.shape[0]):
-            x = np.squeeze(X[i,:,:])
-            x_clust = x[np.argsort(self.biclustModel.row_labels_)]
-            x_clust = x_clust[:, np.argsort(self.biclustModel.column_labels_)]
-            X_reordered[i, :, :] = x_clust
-        return X_reordered
+        # use the mean 2d image of all samples for creating the different graph structures
+        X_mean = np.squeeze(np.mean(X, axis=0))
+
+        d, idx = self.distance_sklearn_metrics(X_mean, k=10, metric='euclidean')
+        adjacency = self.adjacency(d, idx).astype(np.float32)
+
+        #turn adjacency into numpymatrix for concatenation
+        adjacency = adjacency.toarray()
+
+        X = np.reshape(X, (X.shape[0], X.shape[1], X.shape[2], -1))
+        # X = X[..., None] + adjacency[None, None, :] #use broadcasting to speed up computation
+        adjacency = np.repeat(adjacency[np.newaxis, :, :, np.newaxis], X.shape[0], axis=0)
+        X = np.append(X, adjacency, axis=3)
+        print(X.shape)
+
+        # Todo: concatenate matrices, so that you have an extra dimension for the adjacency matrix
+        # Todo: CAVE!!! check that the matrices have similar shape, so that you can actually concatenate them (and make sure that they are compatible with the pytorch_geometric)
+        # Todo: make sure we get the adjacency matrix in the transform statement as well
+        return X
 
