@@ -1,0 +1,101 @@
+import pandas as pd
+import string
+import re
+import csv
+import numpy
+from os import path
+import subprocess
+
+'''
+#load "raw" data
+pms = pd.read_excel("/spm-data/Scratch/spielwiese_vincent/MS_Prediction_Cat12/Data/RawData_AG_Meuth/Subjects_pms.xlsx")
+rms = pd.read_excel("/spm-data/Scratch/spielwiese_vincent/MS_Prediction_Cat12/Data/RawData_AG_Meuth/Subjects_rms.xlsx")
+
+#load data for selecting by info date
+pms_data = pd.read_excel("/spm-data/Scratch/spielwiese_vincent/MS_Prediction_Cat12/Data/RawData_AG_Meuth/Subjects_pms_processed.xlsx")
+rms_data = pd.read_excel("/spm-data/Scratch/spielwiese_vincent/MS_Prediction_Cat12/Data/RawData_AG_Meuth/Subjects_rms_processed.xlsx")
+#select by info date from first frame
+pms_info_date_list = list(pms_data["Infodatum"])
+rms_info_date_list = list(rms_data["Infodatum"])
+
+#make labels for dataframe
+pms_info_date_list_length = len(pms_info_date_list)
+rms_info_date_list_length = len(rms_info_date_list)
+pms_label = ["PMS"] * pms_info_date_list_length
+rms_label = ["RMS"] * rms_info_date_list_length
+#merge pandas dataframes with inner merge
+pms_frame = pms_data.merge(pms, how='inner')
+rms_frame = rms_data.merge(rms, how='inner')
+pms_frame = pms_frame.assign(MS_Type="PMS")
+rms_frame = rms_frame.assign(MS_Type="RMS")
+
+relevant_data = pd.concat([pms_frame, rms_frame])
+relevant_data = relevant_data[['ID', 'Geburtsdatum', 'Infodatum', 'age', 'EDSS', 'MS_Type', 'nifti_t1_dataset_id', 'nifti_t2_dataset_id', 'nifti_flair_dataset_id']]
+relevant_data.to_csv("/spm-data/Scratch/spielwiese_vincent/MS_Prediction_Cat12/Data/RawData_AG_Meuth/Info_Frame_Meuth.csv")
+#remember to check later on if every individual has a unique ID
+'''
+
+'''
+NAKO_data = pd.read_excel("/spm-data/Scratch/spielwiese_vincent/NAKO/NAKO_Essentials.xlsx")
+
+NA_labels = ['NA'] * len(NAKO_data.index)
+NAKO_data.insert(2, "GM_path", NA_labels)
+
+#print(NAKO_data.columns)
+
+with open('/spm-data/Scratch/spielwiese_vincent/NAKO/GM_paths.csv', newline='') as f:
+    reader = csv.reader(f)
+    GM_MRI_paths = list(reader)
+#get MRI string and compare them to the ID
+for path in GM_MRI_paths:
+    path = str(path)
+    path = path[2:-2]
+    #extract the ID from the GM_path
+    ID = path.split("/GreyMatter_Mask/mwp1")[1].split("_30_T1")[0]
+    ID = numpy.int64(ID)
+    #check if the ID is in the NAKO_data
+    row_number = NAKO_data.loc[NAKO_data['ID'] == ID].index[0]
+    NAKO_data.at[row_number, 'GM_path'] = path
+        #if it is in the NAKO_data
+            #add whole GM_path to the csv
+        #if it isn't put NA in the path to csv
+
+NAKO_data.to_csv('/spm-data/Scratch/spielwiese_vincent/NAKO/NAKO_data.csv')
+'''
+'''
+df = pd.read_csv('/spm-data/Scratch/spielwiese_vincent/Genetics/PreprocessingFOR.csv')
+df = df[df.NeuroPath != '/']
+df['NeuroPath'] = df['NeuroPath'].str.strip()
+df.to_csv('/spm-data/Scratch/spielwiese_vincent/Genetics/PreprocessingFOR.csv')
+
+for index, data in df.iterrows():
+    nifti_path = data['NeuroPath']
+    print(nifti_path)
+    if path.exists(data['NeuroPath']):
+        subprocess.call(['cp', nifti_path, '/spm-data/vault-data3/mmll/data/FOR2107/NotLösungTim/neuroimaging/T1/raw-data/freeze03/'])
+'''
+
+
+df1 = pd.read_csv('/spm-data/Scratch/spielwiese_vincent/Tim_Analyse/FOR2107_DF1-3_220120_neuroimaging.csv')
+
+NA_labels = ['NA'] * len(df1.index)
+df1.insert(2, "r1444_path", NA_labels)
+
+
+with open('/spm-data/vault-data3/mmll/data/FOR2107/NotLösungTim/neuroimaging/T1/cat12/mri/mwp1paths.csv', newline='') as f:
+    reader = csv.reader(f)
+    GM_MRI_paths = list(reader)
+
+for path in GM_MRI_paths:
+    path = str(path)
+    path = path[2:-2]
+    #extract the ID from the GM_path
+    ID = path.split("/mri/mwp1")[1].split(".nii")[0]
+    #ID = numpy.int64(ID)
+    #check if the ID is in the NAKO_data
+    row_number = df1.loc[df1['NeuroRaw_T1default__image_name'] == ID].index
+    df1.at[row_number, 'r1444_path'] = path
+        #if it is in the NAKO_data
+            #add whole GM_path to the csv
+        #if it isn't put NA in the path to csv
+
